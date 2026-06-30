@@ -346,7 +346,7 @@
 </main>
 
 <script>
-  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzmuhItJZfKHdkAIfUEjNbkasF5SeLR1racvwYWPTgdRduoPhpWK8MXLvZAeP8fBBDW/exec';
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbySb688HEQAUqxOO77HaaahVy9vQFs5SfLnE8wfj5hdWoRw5JC3FNq1aP7CgtgGbpCO/exec';
 
   let selectedFeeling = '';
   let currentWeather = null;
@@ -511,7 +511,8 @@
           return;
         }
         historyList.innerHTML = data.runs.map(run => {
-          const dateStr = new Date(run.Date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+          const parsedDate = new Date(run.Date);
+          const dateStr = isNaN(parsedDate) ? run.Date : parsedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
           const metaParts = [];
           if (run.Miles) metaParts.push(run.MilesEstimated ? `~${run.Miles} mi` : `${run.Miles} mi`);
           if (run.Steps) metaParts.push(`${run.Steps} steps`);
