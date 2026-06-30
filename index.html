@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Run Log</title>
+<style>
+  :root {
+    --asphalt: #1c1d1f;
+    --asphalt-light: #26282b;
+    --lane: #e8c14a;
+    --lane-dim: #6b5c2c;
+    --chalk: #ece7dc;
+    --chalk-dim: #9a958a;
+    --good: #6fae6f;
+    --okay: #d6a23d;
+    --struggle: #c2614f;
+    --line: #38393c;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--asphalt);
+    color: var(--chalk);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    min-height: 100vh;
+  }
+
+  .stopwatch {
+    font-family: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+  }
+
+  header {
+    padding: 28px 20px 18px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  header h1 {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  header .sub {
+    margin-top: 4px;
+    font-size: 13px;
+    color: var(--chalk-dim);
+  }
+
+  main {
+    max-width: 520px;
+    margin: 0 auto;
+    padding: 20px 16px 60px;
+  }
+
+  .card {
+    background: var(--asphalt-light);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 18px;
+    margin-bottom: 16px;
+  }
+
+  .card h2 {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--chalk-dim);
+    margin: 0 0 14px;
+    font-weight: 600;
+  }
+
+  .row {
+    display: flex;
+    gap: 10px;
+  }
+
+  .field {
+    flex: 1;
+    margin-bottom: 12px;
+  }
+
+  label {
+    display: block;
+    font-size: 12px;
+    color: var(--chalk-dim);
+    margin-bottom: 5px;
+  }
+
+  input[type="date"],
+  input[type="time"],
+  input[type="number"] {
+    width: 100%;
+    background: var(--asphalt);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 10px 10px;
+    color: var(--chalk);
+    font-size: 15px;
+    font-family: inherit;
+  }
+
+  input:focus {
+    outline: none;
+    border-color: var(--lane-dim);
+  }
+
+  .feeling-group {
+    display: flex;
+    gap: 8px;
+  }
+
+  .feeling-btn {
+    flex: 1;
+    padding: 12px 8px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: var(--asphalt);
+    color: var(--chalk-dim);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s, background 0.15s;
+  }
+
+  .feeling-btn[data-val="Great"].active { border-color: var(--good); color: var(--good); background: rgba(111,174,111,0.1); }
+  .feeling-btn[data-val="Okay"].active { border-color: var(--okay); color: var(--okay); background: rgba(214,162,61,0.1); }
+  .feeling-btn[data-val="Struggled"].active { border-color: var(--struggle); color: var(--struggle); background: rgba(194,97,79,0.1); }
+
+  .weather-strip {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--chalk-dim);
+    margin-top: 4px;
+  }
+
+  .weather-strip .temp {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--lane);
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  button.submit {
+    width: 100%;
+    padding: 14px;
+    background: var(--lane);
+    color: var(--asphalt);
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 4px;
+  }
+
+  button.submit:disabled {
+    background: var(--lane-dim);
+    cursor: not-allowed;
+  }
+
+  .stat-readout {
+    display: flex;
+    border-top: 1px solid var(--line);
+    margin-top: 16px;
+    padding-top: 16px;
+  }
+
+  .stat {
+    flex: 1;
+    text-align: center;
+  }
+
+  .stat .val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--lane);
+    line-height: 1.1;
+  }
+
+  .stat .lbl {
+    font-size: 11px;
+    color: var(--chalk-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-top: 4px;
+  }
+
+  .history-item {
+    border-bottom: 1px solid var(--line);
+    padding: 14px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .history-item:last-child { border-bottom: none; }
+
+  .history-left .date {
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .history-left .meta {
+    font-size: 12px;
+    color: var(--chalk-dim);
+    margin-top: 2px;
+  }
+
+  .history-right {
+    text-align: right;
+  }
+
+  .history-right .pace {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 15px;
+    color: var(--lane);
+  }
+
+  .feel-tag {
+    display: inline-block;
+    font-size: 11px;
+    padding: 2px 7px;
+    border-radius: 4px;
+    margin-top: 4px;
+  }
+
+  .feel-tag.Great { background: rgba(111,174,111,0.15); color: var(--good); }
+  .feel-tag.Okay { background: rgba(214,162,61,0.15); color: var(--okay); }
+  .feel-tag.Struggled { background: rgba(194,97,79,0.15); color: var(--struggle); }
+
+  .empty-state {
+    text-align: center;
+    color: var(--chalk-dim);
+    font-size: 13px;
+    padding: 24px 0;
+  }
+
+  .status-msg {
+    font-size: 13px;
+    text-align: center;
+    margin-top: 10px;
+    min-height: 18px;
+  }
+
+  .status-msg.error { color: var(--struggle); }
+  .status-msg.ok { color: var(--good); }
+
+  .delete-btn {
+    background: none;
+    border: none;
+    color: var(--chalk-dim);
+    font-size: 12px;
+    cursor: pointer;
+    padding: 4px 8px;
+  }
+
+  .delete-btn:hover { color: var(--struggle); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Run Log</h1>
+  <div class="sub">Oceanport, NJ</div>
+</header>
+
+<main>
+
+  <div class="card">
+    <h2>Log a run</h2>
+
+    <div class="field">
+      <label for="date">Date</label>
+      <input type="date" id="date">
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label for="startTime">Start time</label>
+        <input type="time" id="startTime">
+      </div>
+      <div class="field">
+        <label for="endTime">End time</label>
+        <input type="time" id="endTime">
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label for="steps">Steps</label>
+        <input type="number" id="steps" placeholder="optional" min="0">
+      </div>
+      <div class="field">
+        <label for="miles">Miles</label>
+        <input type="number" id="miles" placeholder="optional" min="0" step="0.01">
+      </div>
+    </div>
+
+    <div class="field">
+      <label>How did it feel?</label>
+      <div class="feeling-group">
+        <button type="button" class="feeling-btn" data-val="Great">Great</button>
+        <button type="button" class="feeling-btn" data-val="Okay">Okay</button>
+        <button type="button" class="feeling-btn" data-val="Struggled">Struggled</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Weather right now</label>
+      <div class="weather-strip" id="weatherStrip">Loading...</div>
+    </div>
+
+    <button class="submit" id="submitBtn">Save run</button>
+    <div class="status-msg" id="statusMsg"></div>
+
+    <div class="stat-readout" id="statReadout" style="display:none;">
+      <div class="stat">
+        <div class="val stopwatch" id="statPace">--</div>
+        <div class="lbl">Min / mile</div>
+      </div>
+      <div class="stat">
+        <div class="val stopwatch" id="statTime">--</div>
+        <div class="lbl">Total time</div>
+      </div>
+      <div class="stat">
+        <div class="val stopwatch" id="statSpm">--</div>
+        <div class="lbl">Steps / min</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>History</h2>
+    <div id="historyList">
+      <div class="empty-state">No runs logged yet</div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxf3g1bUWxEpRHV_ZqV_jlYwZ40r8_aKL0ILrQXmM-2q24Zukx4OciIV6reiTozy006/exec';
+
+  let selectedFeeling = '';
+  let currentWeather = null;
+
+  const dateEl = document.getElementById('date');
+  const startTimeEl = document.getElementById('startTime');
+  const endTimeEl = document.getElementById('endTime');
+  const stepsEl = document.getElementById('steps');
+  const milesEl = document.getElementById('miles');
+  const submitBtn = document.getElementById('submitBtn');
+  const statusMsg = document.getElementById('statusMsg');
+  const weatherStrip = document.getElementById('weatherStrip');
+  const historyList = document.getElementById('historyList');
+  const statReadout = document.getElementById('statReadout');
+
+  // Default date to today
+  dateEl.value = new Date().toISOString().split('T')[0];
+
+  document.querySelectorAll('.feeling-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.feeling-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      selectedFeeling = btn.dataset.val;
+    });
+  });
+
+  function fetchWeather() {
+    // Oceanport, NJ approx coordinates
+    const lat = 40.327;
+    const lon = -74.046;
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code,wind_speed_10m&temperature_unit=fahrenheit&wind_speed_unit=mph`;
+
+    fetch(url)
+      .then(r => r.json())
+      .then(data => {
+        const c = data.current;
+        const condition = weatherCodeToText(c.weather_code);
+        currentWeather = {
+          temp: Math.round(c.temperature_2m),
+          condition: condition,
+          wind: Math.round(c.wind_speed_10m)
+        };
+        weatherStrip.innerHTML = `<span class="temp">${currentWeather.temp}°F</span> <span>${condition}, ${currentWeather.wind} mph wind</span>`;
+      })
+      .catch(() => {
+        weatherStrip.textContent = 'Weather unavailable';
+      });
+  }
+
+  function weatherCodeToText(code) {
+    const map = {
+      0: 'Clear', 1: 'Mostly clear', 2: 'Partly cloudy', 3: 'Overcast',
+      45: 'Foggy', 48: 'Foggy',
+      51: 'Light drizzle', 53: 'Drizzle', 55: 'Heavy drizzle',
+      61: 'Light rain', 63: 'Rain', 65: 'Heavy rain',
+      71: 'Light snow', 73: 'Snow', 75: 'Heavy snow',
+      80: 'Rain showers', 81: 'Rain showers', 82: 'Heavy showers',
+      95: 'Thunderstorm'
+    };
+    return map[code] || 'Conditions unclear';
+  }
+
+  function formatMinutes(totalMin) {
+    if (!totalMin && totalMin !== 0) return '--';
+    const h = Math.floor(totalMin / 60);
+    const m = Math.floor(totalMin % 60);
+    const s = Math.round((totalMin % 1) * 60);
+    if (h > 0) return `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    return `${m}:${String(s).padStart(2,'0')}`;
+  }
+
+  function formatPace(paceMin) {
+    if (!paceMin && paceMin !== 0) return '--';
+    const m = Math.floor(paceMin);
+    const s = Math.round((paceMin - m) * 60);
+    return `${m}:${String(s).padStart(2,'0')}`;
+  }
+
+  submitBtn.addEventListener('click', () => {
+    const date = dateEl.value;
+    const startTime = startTimeEl.value;
+    const endTime = endTimeEl.value;
+    const steps = stepsEl.value;
+    const miles = milesEl.value;
+
+    if (!date || !startTime || !endTime) {
+      showStatus('Date, start time and end time are required', true);
+      return;
+    }
+    if (!steps && !miles) {
+      showStatus('Enter steps or miles', true);
+      return;
+    }
+    if (!selectedFeeling) {
+      showStatus('Pick how the run felt', true);
+      return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Saving...';
+
+    const params = new URLSearchParams({
+      action: 'addRun',
+      date, startTime, endTime, steps, miles,
+      feeling: selectedFeeling,
+      weatherTemp: currentWeather ? currentWeather.temp : '',
+      weatherCondition: currentWeather ? currentWeather.condition : '',
+      weatherWind: currentWeather ? currentWeather.wind : ''
+    });
+
+    fetch(`${SCRIPT_URL}?${params.toString()}`)
+      .then(r => r.json())
+      .then(data => {
+        if (data.error) {
+          showStatus(data.error, true);
+          return;
+        }
+        showStatus('Run saved', false);
+        showStats(data);
+        resetForm();
+        loadHistory();
+      })
+      .catch(() => showStatus('Could not save run, check connection', true))
+      .finally(() => {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Save run';
+      });
+  });
+
+  function showStats(data) {
+    statReadout.style.display = 'flex';
+    document.getElementById('statPace').textContent = formatPace(data.pacePerMile);
+    document.getElementById('statTime').textContent = formatMinutes(data.totalMinutes);
+    document.getElementById('statSpm').textContent = data.stepsPerMinute ? Math.round(data.stepsPerMinute) : '--';
+  }
+
+  function showStatus(msg, isError) {
+    statusMsg.textContent = msg;
+    statusMsg.className = 'status-msg ' + (isError ? 'error' : 'ok');
+  }
+
+  function resetForm() {
+    startTimeEl.value = '';
+    endTimeEl.value = '';
+    stepsEl.value = '';
+    milesEl.value = '';
+    selectedFeeling = '';
+    document.querySelectorAll('.feeling-btn').forEach(b => b.classList.remove('active'));
+  }
+
+  function loadHistory() {
+    fetch(`${SCRIPT_URL}?action=getRuns`)
+      .then(r => r.json())
+      .then(data => {
+        if (!data.runs || data.runs.length === 0) {
+          historyList.innerHTML = '<div class="empty-state">No runs logged yet</div>';
+          return;
+        }
+        historyList.innerHTML = data.runs.map(run => {
+          const dateStr = new Date(run.Date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+          const metaParts = [];
+          if (run.Miles) metaParts.push(`${run.Miles} mi`);
+          if (run.Steps) metaParts.push(`${run.Steps} steps`);
+          if (run.WeatherTemp) metaParts.push(`${run.WeatherTemp}°F`);
+          return `
+            <div class="history-item">
+              <div class="history-left">
+                <div class="date">${dateStr}</div>
+                <div class="meta">${metaParts.join(' · ')}</div>
+                ${run.Feeling ? `<span class="feel-tag ${run.Feeling}">${run.Feeling}</span>` : ''}
+              </div>
+              <div class="history-right">
+                <div class="pace stopwatch">${formatPace(run.PacePerMile)} /mi</div>
+                <button class="delete-btn" onclick="deleteRun('${run.RowId}')">Delete</button>
+              </div>
+            </div>
+          `;
+        }).join('');
+      })
+      .catch(() => {
+        historyList.innerHTML = '<div class="empty-state">Could not load history</div>';
+      });
+  }
+
+  function deleteRun(rowId) {
+    if (!confirm('Delete this run?')) return;
+    fetch(`${SCRIPT_URL}?action=deleteRun&rowId=${rowId}`)
+      .then(r => r.json())
+      .then(() => loadHistory());
+  }
+
+  fetchWeather();
+  loadHistory();
+</script>
+
+</body>
+</html>
