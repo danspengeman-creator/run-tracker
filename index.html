@@ -8,14 +8,14 @@
   :root {
     --asphalt: #1c1d1f;
     --asphalt-light: #26282b;
-    --lane: #e8c14a;
+    --lane: #f5d264;
     --lane-dim: #6b5c2c;
-    --chalk: #ece7dc;
-    --chalk-dim: #9a958a;
-    --good: #6fae6f;
-    --okay: #d6a23d;
-    --struggle: #c2614f;
-    --line: #38393c;
+    --chalk: #ffffff;
+    --chalk-dim: #c2bdb1;
+    --good: #8bc98b;
+    --okay: #ecb955;
+    --struggle: #e0796a;
+    --line: #4a4c50;
   }
 
   * { box-sizing: border-box; }
@@ -85,9 +85,10 @@
 
   label {
     display: block;
-    font-size: 12px;
+    font-size: 13px;
     color: var(--chalk-dim);
     margin-bottom: 5px;
+    font-weight: 500;
   }
 
   input[type="date"],
@@ -134,16 +135,33 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    font-size: 13px;
+    font-size: 14px;
     color: var(--chalk-dim);
     margin-top: 4px;
+  }
+
+  .weather-strip svg {
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+  }
+
+  .weather-strip .weather-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.3;
   }
 
   .weather-strip .temp {
     font-family: 'JetBrains Mono', monospace;
     color: var(--lane);
-    font-size: 15px;
-    font-weight: 600;
+    font-size: 17px;
+    font-weight: 700;
+  }
+
+  .weather-strip .condition {
+    font-size: 12px;
+    color: var(--chalk-dim);
   }
 
   button.submit {
@@ -169,6 +187,16 @@
     border-top: 1px solid var(--line);
     margin-top: 16px;
     padding-top: 16px;
+  }
+
+  .stat-readout.pulse {
+    animation: statPulse 0.4s ease;
+  }
+
+  @keyframes statPulse {
+    0% { transform: scale(0.97); opacity: 0.6; }
+    60% { transform: scale(1.01); }
+    100% { transform: scale(1); opacity: 1; }
   }
 
   .stat {
@@ -389,7 +417,7 @@
           condition: condition,
           wind: Math.round(c.wind_speed_10m)
         };
-        weatherStrip.innerHTML = `<span class="temp">${currentWeather.temp}°F</span> <span>${condition}, ${currentWeather.wind} mph wind</span>`;
+        weatherStrip.innerHTML = `${weatherCodeToIcon(c.weather_code)}<div class="weather-text"><span class="temp">${currentWeather.temp}°F</span><span class="condition">${condition}, ${currentWeather.wind} mph wind</span></div>`;
       })
       .catch(() => {
         weatherStrip.textContent = 'Weather unavailable';
@@ -409,6 +437,27 @@
     return map[code] || 'Conditions unclear';
   }
 
+  function weatherCodeToIcon(code) {
+    // Simple, high-contrast inline SVG icons. Sun uses lane yellow,
+    // clouds and rain use chalk tones so they stay legible outdoors.
+    const sun = `<svg viewBox="0 0 24 24" fill="none" stroke="#f5d264" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.5" fill="#f5d264"/><line x1="12" y1="2" x2="12" y2="4.5"/><line x1="12" y1="19.5" x2="12" y2="22"/><line x1="2" y1="12" x2="4.5" y2="12"/><line x1="19.5" y1="12" x2="22" y2="12"/><line x1="4.6" y1="4.6" x2="6.3" y2="6.3"/><line x1="17.7" y1="17.7" x2="19.4" y2="19.4"/><line x1="4.6" y1="19.4" x2="6.3" y2="17.7"/><line x1="17.7" y1="6.3" x2="19.4" y2="4.6"/></svg>`;
+    const partlyCloudy = `<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="9" r="3.5" fill="#f5d264" stroke="none"/><path d="M7 19h10a4 4 0 0 0 0-8 5.5 5.5 0 0 0-10.5 1.5A3.5 3.5 0 0 0 7 19z" fill="#ffffff" stroke="#ffffff"/></svg>`;
+    const cloudy = `<svg viewBox="0 0 24 24" fill="#ffffff" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 18h11a4 4 0 0 0 0-8 6 6 0 0 0-11.5 1.8A3.5 3.5 0 0 0 6 18z"/></svg>`;
+    const fog = `<svg viewBox="0 0 24 24" fill="none" stroke="#c2bdb1" stroke-width="2" stroke-linecap="round"><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="13" x2="21" y2="13"/><line x1="3" y1="17" x2="21" y2="17"/></svg>`;
+    const rain = `<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M6 14h11a4 4 0 0 0 0-8 6 6 0 0 0-11.5 1.8A3.5 3.5 0 0 0 6 14z" fill="#ffffff" stroke="#ffffff"/><line x1="8" y1="17" x2="7" y2="21" stroke="#5b9cf6"/><line x1="12" y1="17" x2="11" y2="21" stroke="#5b9cf6"/><line x1="16" y1="17" x2="15" y2="21" stroke="#5b9cf6"/></svg>`;
+    const snow = `<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M6 14h11a4 4 0 0 0 0-8 6 6 0 0 0-11.5 1.8A3.5 3.5 0 0 0 6 14z" fill="#ffffff" stroke="#ffffff"/><circle cx="8" cy="19" r="1" fill="#ffffff" stroke="none"/><circle cx="12" cy="20" r="1" fill="#ffffff" stroke="none"/><circle cx="16" cy="19" r="1" fill="#ffffff" stroke="none"/></svg>`;
+    const storm = `<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 13h11a4 4 0 0 0 0-8 6 6 0 0 0-11.5 1.8A3.5 3.5 0 0 0 6 13z" fill="#ffffff" stroke="#ffffff"/><polygon points="13,14 9,20 12,20 10,24 16,17 13,17" fill="#f5d264" stroke="#f5d264"/></svg>`;
+
+    if (code === 0) return sun;
+    if (code === 1 || code === 2) return partlyCloudy;
+    if (code === 3) return cloudy;
+    if (code === 45 || code === 48) return fog;
+    if ([51,53,55,61,63,65,80,81,82].includes(code)) return rain;
+    if ([71,73,75].includes(code)) return snow;
+    if (code === 95) return storm;
+    return cloudy;
+  }
+
   function formatMinutes(totalMin) {
     if (!totalMin && totalMin !== 0) return '--';
     const h = Math.floor(totalMin / 60);
@@ -425,6 +474,18 @@
     return `${m}:${String(s).padStart(2,'0')}`;
   }
 
+  function vibrateSuccess() {
+    if (navigator.vibrate) {
+      navigator.vibrate([15, 40, 15]);
+    }
+  }
+
+  function vibrateError() {
+    if (navigator.vibrate) {
+      navigator.vibrate(60);
+    }
+  }
+
   submitBtn.addEventListener('click', () => {
     const date = dateEl.value;
     const startTime = startTimeEl.value;
@@ -434,14 +495,17 @@
 
     if (!date || !startTime || !endTime) {
       showStatus('Date, start time and end time are required', true);
+      vibrateError();
       return;
     }
     if (!steps && !miles) {
       showStatus('Enter steps or miles', true);
+      vibrateError();
       return;
     }
     if (!selectedFeeling) {
       showStatus('Pick how the run felt', true);
+      vibrateError();
       return;
     }
 
@@ -462,8 +526,10 @@
       .then(data => {
         if (data.error) {
           showStatus(data.error, true);
+          vibrateError();
           return;
         }
+        vibrateSuccess();
         showStats(data);
         if (!data.milesEstimated) {
           showStatus('Run saved', false);
@@ -480,6 +546,9 @@
 
   function showStats(data) {
     statReadout.style.display = 'flex';
+    statReadout.classList.remove('pulse');
+    void statReadout.offsetWidth; // restart animation
+    statReadout.classList.add('pulse');
     document.getElementById('statPace').textContent = formatPace(data.pacePerMile);
     document.getElementById('statTime').textContent = formatMinutes(data.totalMinutes);
     document.getElementById('statSpm').textContent = data.stepsPerMinute ? Math.round(data.stepsPerMinute) : '--';
