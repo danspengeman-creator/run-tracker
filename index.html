@@ -311,12 +311,12 @@
 
     <div class="row">
       <div class="field">
-        <label for="startTime">Start time</label>
-        <input type="time" id="startTime">
+        <label for="durationMin">Duration (min)</label>
+        <input type="number" id="durationMin" placeholder="e.g. 28" min="0" step="1">
       </div>
       <div class="field">
-        <label for="endTime">End time</label>
-        <input type="time" id="endTime">
+        <label for="durationSec">Seconds</label>
+        <input type="number" id="durationSec" placeholder="optional" min="0" max="59" step="1">
       </div>
     </div>
 
@@ -374,14 +374,14 @@
 </main>
 
 <script>
-  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxPkI_REmsvh4K624VCRnU59EfsU207446rHMbnnBmlo05vbMPXPInSVejf3loyekHQ/exec';
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxi017icK2iFx4wfr3LYNrBY8A6sJzbx77KX3QBVEH2QQBQ4zfzGh_FXXW8b7XVuHwh/exec';
 
   let selectedFeeling = '';
   let currentWeather = null;
 
   const dateEl = document.getElementById('date');
-  const startTimeEl = document.getElementById('startTime');
-  const endTimeEl = document.getElementById('endTime');
+  const durationMinEl = document.getElementById('durationMin');
+  const durationSecEl = document.getElementById('durationSec');
   const stepsEl = document.getElementById('steps');
   const milesEl = document.getElementById('miles');
   const submitBtn = document.getElementById('submitBtn');
@@ -488,13 +488,13 @@
 
   submitBtn.addEventListener('click', () => {
     const date = dateEl.value;
-    const startTime = startTimeEl.value;
-    const endTime = endTimeEl.value;
+    const durationMin = durationMinEl.value;
+    const durationSec = durationSecEl.value;
     const steps = stepsEl.value;
     const miles = milesEl.value;
 
-    if (!date || !startTime || !endTime) {
-      showStatus('Date, start time and end time are required', true);
+    if (!date || !durationMin) {
+      showStatus('Date and duration are required', true);
       vibrateError();
       return;
     }
@@ -512,9 +512,11 @@
     submitBtn.disabled = true;
     submitBtn.textContent = 'Saving...';
 
+    const totalMinutes = Number(durationMin) + (durationSec ? Number(durationSec) / 60 : 0);
+
     const params = new URLSearchParams({
       action: 'addRun',
-      date, startTime, endTime, steps, miles,
+      date, durationMinutes: totalMinutes, steps, miles,
       feeling: selectedFeeling,
       weatherTemp: currentWeather ? currentWeather.temp : '',
       weatherCondition: currentWeather ? currentWeather.condition : '',
@@ -563,8 +565,8 @@
   }
 
   function resetForm() {
-    startTimeEl.value = '';
-    endTimeEl.value = '';
+    durationMinEl.value = '';
+    durationSecEl.value = '';
     stepsEl.value = '';
     milesEl.value = '';
     selectedFeeling = '';
