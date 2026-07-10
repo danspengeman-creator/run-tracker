@@ -80,14 +80,28 @@
 
   .field {
     flex: 1;
-    margin-bottom: 12px;
+    margin-bottom: 20px;
+  }
+
+  .field-quiet {
+    margin-bottom: 16px;
+    opacity: 0.75;
+  }
+
+  .field-quiet input[type="date"] {
+    padding: 7px 10px;
+    font-size: 13px;
+  }
+
+  .field-quiet label {
+    font-size: 11px;
   }
 
   label {
     display: block;
     font-size: 13px;
     color: var(--chalk-dim);
-    margin-bottom: 5px;
+    margin-bottom: 6px;
     font-weight: 500;
   }
 
@@ -98,9 +112,9 @@
     background: var(--asphalt);
     border: 1px solid var(--line);
     border-radius: 6px;
-    padding: 10px 10px;
+    padding: 12px 12px;
     color: var(--chalk);
-    font-size: 15px;
+    font-size: 16px;
     font-family: inherit;
   }
 
@@ -118,13 +132,14 @@
   .duration-row input {
     text-align: center;
     font-family: 'JetBrains Mono', monospace;
-    font-size: 20px;
+    font-size: 26px;
     font-weight: 700;
+    padding: 14px 10px;
   }
 
   .duration-colon {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 20px;
+    font-size: 26px;
     font-weight: 700;
     color: var(--chalk-dim);
   }
@@ -133,7 +148,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 5px;
+    margin-bottom: 6px;
   }
 
   .distance-header label {
@@ -147,22 +162,30 @@
     border-radius: 6px;
     padding: 2px;
     gap: 2px;
+    opacity: 0.8;
   }
 
   .toggle-btn {
     border: none;
     background: none;
     color: var(--chalk-dim);
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 600;
+    letter-spacing: 0.03em;
     padding: 5px 10px;
     border-radius: 4px;
     cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
   }
 
   .toggle-btn.active {
-    background: var(--lane);
-    color: var(--asphalt);
+    background: var(--lane-dim);
+    color: var(--chalk);
+  }
+
+  #steps, #miles {
+    font-size: 18px;
+    font-weight: 600;
   }
 
   .feeling-group {
@@ -172,20 +195,24 @@
 
   .feeling-btn {
     flex: 1;
-    padding: 12px 8px;
+    padding: 14px 8px;
     border-radius: 8px;
-    border: 1px solid var(--line);
+    border: 1.5px solid var(--line);
     background: var(--asphalt);
     color: var(--chalk-dim);
-    font-size: 13px;
-    font-weight: 600;
+    font-size: 14px;
+    font-weight: 700;
     cursor: pointer;
-    transition: border-color 0.15s, color 0.15s, background 0.15s;
+    transition: border-color 0.15s, color 0.15s, background 0.15s, transform 0.1s;
   }
 
-  .feeling-btn[data-val="Great"].active { border-color: var(--good); color: var(--good); background: rgba(111,174,111,0.1); }
-  .feeling-btn[data-val="Okay"].active { border-color: var(--okay); color: var(--okay); background: rgba(214,162,61,0.1); }
-  .feeling-btn[data-val="Struggled"].active { border-color: var(--struggle); color: var(--struggle); background: rgba(194,97,79,0.1); }
+  .feeling-btn:active {
+    transform: scale(0.97);
+  }
+
+  .feeling-btn[data-val="Great"].active { border-color: var(--good); color: var(--good); background: rgba(139,201,139,0.14); }
+  .feeling-btn[data-val="Okay"].active { border-color: var(--okay); color: var(--okay); background: rgba(236,185,85,0.14); }
+  .feeling-btn[data-val="Struggled"].active { border-color: var(--struggle); color: var(--struggle); background: rgba(224,121,106,0.14); }
 
   .weather-strip {
     display: flex;
@@ -397,19 +424,10 @@
 </head>
 <body>
 
-<header>
-  <h1>Run Log</h1>
-</header>
-
 <main>
 
   <div class="card">
     <h2>Log a run</h2>
-
-    <div class="field">
-      <label for="date">Date</label>
-      <input type="date" id="date">
-    </div>
 
     <div class="field">
       <label for="durationMin">Duration</label>
@@ -432,6 +450,11 @@
       <input type="number" id="miles" placeholder="e.g. 3.1" min="0" step="0.01">
     </div>
 
+    <div class="field field-quiet">
+      <label for="date">Date</label>
+      <input type="date" id="date">
+    </div>
+
     <div class="field">
       <label>How did it feel?</label>
       <div class="feeling-group">
@@ -441,7 +464,7 @@
       </div>
     </div>
 
-    <div class="field">
+    <div class="field field-quiet">
       <label>Weather right now</label>
       <div class="weather-strip" id="weatherStrip">Loading...</div>
     </div>
