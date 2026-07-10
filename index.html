@@ -109,6 +109,62 @@
     border-color: var(--lane-dim);
   }
 
+  .duration-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .duration-row input {
+    text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 20px;
+    font-weight: 700;
+  }
+
+  .duration-colon {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--chalk-dim);
+  }
+
+  .distance-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+  }
+
+  .distance-header label {
+    margin-bottom: 0;
+  }
+
+  .distance-toggle {
+    display: flex;
+    background: var(--asphalt);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 2px;
+    gap: 2px;
+  }
+
+  .toggle-btn {
+    border: none;
+    background: none;
+    color: var(--chalk-dim);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .toggle-btn.active {
+    background: var(--lane);
+    color: var(--asphalt);
+  }
+
   .feeling-group {
     display: flex;
     gap: 8px;
@@ -220,6 +276,49 @@
     margin-top: 4px;
   }
 
+  .pace-gauge {
+    margin-top: 16px;
+  }
+
+  .pace-gauge-track {
+    position: relative;
+    height: 6px;
+    border-radius: 3px;
+    background: linear-gradient(90deg, var(--struggle) 0%, var(--okay) 50%, var(--good) 100%);
+  }
+
+  .pace-gauge-fill {
+    display: none;
+  }
+
+  .pace-gauge-marker {
+    position: absolute;
+    top: 50%;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--chalk);
+    border: 2px solid var(--asphalt);
+    transform: translate(-50%, -50%);
+    transition: left 0.4s ease;
+    left: 50%;
+  }
+
+  .pace-gauge-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    color: var(--chalk-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-top: 6px;
+  }
+
+  .pace-gauge-labels #paceGaugeTag {
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+
   .history-item {
     border-bottom: 1px solid var(--line);
     padding: 14px 0;
@@ -264,10 +363,14 @@
   .feel-tag.Struggled { background: rgba(194,97,79,0.15); color: var(--struggle); }
 
   .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
     text-align: center;
     color: var(--chalk-dim);
     font-size: 13px;
-    padding: 24px 0;
+    padding: 28px 0;
   }
 
   .status-msg {
@@ -296,7 +399,6 @@
 
 <header>
   <h1>Run Log</h1>
-  <div class="sub">Oceanport, NJ</div>
 </header>
 
 <main>
@@ -309,26 +411,25 @@
       <input type="date" id="date">
     </div>
 
-    <div class="row">
-      <div class="field">
-        <label for="durationMin">Duration (min)</label>
-        <input type="number" id="durationMin" placeholder="e.g. 28" min="0" step="1">
-      </div>
-      <div class="field">
-        <label for="durationSec">Seconds</label>
-        <input type="number" id="durationSec" placeholder="optional" min="0" max="59" step="1">
+    <div class="field">
+      <label for="durationMin">Duration</label>
+      <div class="duration-row">
+        <input type="number" id="durationMin" placeholder="MM" min="0" step="1">
+        <span class="duration-colon">:</span>
+        <input type="number" id="durationSec" placeholder="SS" min="0" max="59" step="1">
       </div>
     </div>
 
-    <div class="row">
-      <div class="field">
-        <label for="steps">Steps</label>
-        <input type="number" id="steps" placeholder="optional" min="0">
+    <div class="field">
+      <div class="distance-header">
+        <label id="distanceLabel">Distance</label>
+        <div class="distance-toggle">
+          <button type="button" class="toggle-btn" data-mode="miles">Miles</button>
+          <button type="button" class="toggle-btn active" data-mode="steps">Steps</button>
+        </div>
       </div>
-      <div class="field">
-        <label for="miles">Miles</label>
-        <input type="number" id="miles" placeholder="auto from steps" min="0" step="0.01">
-      </div>
+      <input type="number" id="steps" placeholder="e.g. 4500" min="0" style="display:none;">
+      <input type="number" id="miles" placeholder="e.g. 3.1" min="0" step="0.01">
     </div>
 
     <div class="field">
@@ -362,12 +463,31 @@
         <div class="lbl">Steps / min</div>
       </div>
     </div>
+
+    <div class="pace-gauge" id="paceGauge" style="display:none;">
+      <div class="pace-gauge-track">
+        <div class="pace-gauge-fill" id="paceGaugeFill"></div>
+        <div class="pace-gauge-marker" id="paceGaugeMarker"></div>
+      </div>
+      <div class="pace-gauge-labels">
+        <span>Slow</span>
+        <span id="paceGaugeTag">--</span>
+        <span>Fast</span>
+      </div>
+    </div>
   </div>
 
   <div class="card">
     <h2>History</h2>
     <div id="historyList">
-      <div class="empty-state">No runs logged yet</div>
+      <div class="empty-state">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="3 3" width="36" height="36">
+          <circle cx="12" cy="13" r="8"/>
+          <line x1="12" y1="13" x2="12" y2="9"/>
+          <line x1="9" y1="3" x2="15" y2="3"/>
+        </svg>
+        <div>First run's on the clock. Log one to get started.</div>
+      </div>
     </div>
   </div>
 
@@ -392,6 +512,37 @@
 
   // Default date to today
   dateEl.value = new Date().toISOString().split('T')[0];
+
+  // Distance mode toggle (miles vs steps), remembers last choice
+  let distanceMode = localStorage_safe_get('distanceMode') || 'steps';
+
+  function localStorage_safe_get(key) {
+    try { return localStorage.getItem(key); } catch (e) { return null; }
+  }
+  function localStorage_safe_set(key, val) {
+    try { localStorage.setItem(key, val); } catch (e) { /* ignore */ }
+  }
+
+  function setDistanceMode(mode) {
+    distanceMode = mode;
+    localStorage_safe_set('distanceMode', mode);
+    document.querySelectorAll('.toggle-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.mode === mode);
+    });
+    if (mode === 'miles') {
+      milesEl.style.display = '';
+      stepsEl.style.display = 'none';
+    } else {
+      milesEl.style.display = 'none';
+      stepsEl.style.display = '';
+    }
+  }
+
+  document.querySelectorAll('.toggle-btn').forEach(btn => {
+    btn.addEventListener('click', () => setDistanceMode(btn.dataset.mode));
+  });
+
+  setDistanceMode(distanceMode);
 
   document.querySelectorAll('.feeling-btn').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -554,9 +705,36 @@
     document.getElementById('statPace').textContent = formatPace(data.pacePerMile);
     document.getElementById('statTime').textContent = formatMinutes(data.totalMinutes);
     document.getElementById('statSpm').textContent = data.stepsPerMinute ? Math.round(data.stepsPerMinute) : '--';
+    updatePaceGauge(data.pacePerMile);
     if (data.milesEstimated) {
       showStatus(`Run saved (miles estimated at ${data.miles} mi from steps)`, false);
     }
+  }
+
+  function updatePaceGauge(paceMin) {
+    const gauge = document.getElementById('paceGauge');
+    const marker = document.getElementById('paceGaugeMarker');
+    const tag = document.getElementById('paceGaugeTag');
+
+    if (!paceMin && paceMin !== 0) {
+      gauge.style.display = 'none';
+      return;
+    }
+    gauge.style.display = 'block';
+
+    // Fast end 7:30/mi, slow end 12:00/mi, scaled between
+    const FAST = 7.5;
+    const SLOW = 12;
+    let pct = (SLOW - paceMin) / (SLOW - FAST);
+    pct = Math.max(0, Math.min(1, pct));
+    marker.style.left = `${pct * 100}%`;
+
+    let label, color;
+    if (paceMin <= 8.5) { label = 'Fast'; color = 'var(--good)'; }
+    else if (paceMin <= 10) { label = 'Steady'; color = 'var(--okay)'; }
+    else { label = 'Easy'; color = 'var(--struggle)'; }
+    tag.textContent = label;
+    tag.style.color = color;
   }
 
   function showStatus(msg, isError) {
@@ -578,7 +756,14 @@
       .then(r => r.json())
       .then(data => {
         if (!data.runs || data.runs.length === 0) {
-          historyList.innerHTML = '<div class="empty-state">No runs logged yet</div>';
+          historyList.innerHTML = `<div class="empty-state">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="3 3" width="36" height="36">
+              <circle cx="12" cy="13" r="8"/>
+              <line x1="12" y1="13" x2="12" y2="9"/>
+              <line x1="9" y1="3" x2="15" y2="3"/>
+            </svg>
+            <div>First run's on the clock. Log one to get started.</div>
+          </div>`;
           return;
         }
         historyList.innerHTML = data.runs.map(run => {
