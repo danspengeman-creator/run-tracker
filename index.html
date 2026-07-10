@@ -432,7 +432,7 @@
     <div class="field">
       <label for="durationMin">Duration</label>
       <div class="duration-row">
-        <input type="number" id="durationMin" placeholder="MM" min="0" step="1">
+        <input type="number" id="durationMin" placeholder="MM" min="0" step="1" required>
         <span class="duration-colon">:</span>
         <input type="number" id="durationSec" placeholder="SS" min="0" max="59" step="1">
       </div>
@@ -555,9 +555,11 @@
     if (mode === 'miles') {
       milesEl.style.display = '';
       stepsEl.style.display = 'none';
+      stepsEl.value = '';
     } else {
       milesEl.style.display = 'none';
       stepsEl.style.display = '';
+      milesEl.value = '';
     }
   }
 
@@ -664,8 +666,8 @@
     const date = dateEl.value;
     const durationMin = durationMinEl.value;
     const durationSec = durationSecEl.value;
-    const steps = stepsEl.value;
-    const miles = milesEl.value;
+    const steps = distanceMode === 'steps' ? stepsEl.value : '';
+    const miles = distanceMode === 'miles' ? milesEl.value : '';
 
     if (!date || !durationMin) {
       showStatus('Date and duration are required', true);
