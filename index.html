@@ -417,6 +417,20 @@
   .status-msg.error { color: var(--struggle); }
   .status-msg.ok { color: var(--good); }
 
+  .encouragement {
+    text-align: center;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--lane);
+    margin-top: 12px;
+    letter-spacing: -0.01em;
+  }
+
+  .encouragement.pulse {
+    animation: statPulse 0.4s ease;
+  }
+
   .delete-btn {
     background: none;
     border: none;
@@ -479,6 +493,7 @@
 
     <button class="submit" id="submitBtn">Save run</button>
     <div class="status-msg" id="statusMsg"></div>
+    <div class="encouragement" id="encouragement" style="display:none;"></div>
 
     <div class="stat-readout" id="statReadout" style="display:none;">
       <div class="stat">
@@ -720,6 +735,7 @@
         }
         vibrateSuccess();
         showStats(data);
+        showEncouragement(selectedFeeling);
         if (!data.milesEstimated) {
           showStatus('Run saved', false);
         }
@@ -732,6 +748,53 @@
         submitBtn.textContent = 'Save run';
       });
   });
+
+  const ENCOURAGEMENT = {
+    Great: [
+      "Nice work out there.",
+      "Look at you go.",
+      "Crushed it.",
+      "That's how it's done.",
+      "Way to show up today.",
+      "Proud of you for getting out there.",
+      "Building something here.",
+      "Well earned.",
+      "Consistency looks good on you.",
+      "Stacking up the miles."
+    ],
+    Okay: [
+      "Another one in the books.",
+      "That's a solid effort.",
+      "Every run counts.",
+      "Good on you.",
+      "Showing up is the hard part. Done.",
+      "That's another brick in the wall.",
+      "Nice, steady progress.",
+      "Getting it done, one run at a time."
+    ],
+    Struggled: [
+      "Tough one, but you finished it.",
+      "That took something. Nice work.",
+      "Showing up on a hard day counts double.",
+      "Not every run feels good. You still did it.",
+      "Rough one, but it's in the books.",
+      "Some days are just about finishing. You did."
+    ]
+  };
+
+  function pickEncouragement(feeling) {
+    const pool = ENCOURAGEMENT[feeling] || ENCOURAGEMENT.Okay;
+    return pool[Math.floor(Math.random() * pool.length)];
+  }
+
+  function showEncouragement(feeling) {
+    const el = document.getElementById('encouragement');
+    el.textContent = pickEncouragement(feeling);
+    el.style.display = 'block';
+    el.classList.remove('pulse');
+    void el.offsetWidth;
+    el.classList.add('pulse');
+  }
 
   function showStats(data) {
     statReadout.style.display = 'flex';
