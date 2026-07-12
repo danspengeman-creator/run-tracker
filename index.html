@@ -821,16 +821,16 @@
     }
     gauge.style.display = 'block';
 
-    // Fast end 7:30/mi, slow end 12:00/mi, scaled between
+    // Fast end 7:30/mi, slow end 10:30/mi, calibrated to her actual range
     const FAST = 7.5;
-    const SLOW = 12;
+    const SLOW = 10.5;
     let pct = (SLOW - paceMin) / (SLOW - FAST);
     pct = Math.max(0, Math.min(1, pct));
     marker.style.left = `${pct * 100}%`;
 
     let label, color;
-    if (paceMin <= 8.5) { label = 'Fast'; color = 'var(--good)'; }
-    else if (paceMin <= 10) { label = 'Steady'; color = 'var(--okay)'; }
+    if (paceMin <= 8.25) { label = 'Fast'; color = 'var(--good)'; }
+    else if (paceMin <= 9.5) { label = 'Steady'; color = 'var(--okay)'; }
     else { label = 'Easy'; color = 'var(--struggle)'; }
     tag.textContent = label;
     tag.style.color = color;
