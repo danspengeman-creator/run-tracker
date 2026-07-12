@@ -188,6 +188,13 @@
     font-weight: 600;
   }
 
+  .field-hint {
+    font-size: 11px;
+    color: var(--chalk-dim);
+    margin-top: 6px;
+    line-height: 1.4;
+  }
+
   .feeling-group {
     display: flex;
     gap: 8px;
@@ -448,6 +455,7 @@
       </div>
       <input type="number" id="steps" placeholder="e.g. 4500" min="0" style="display:none;">
       <input type="number" id="miles" placeholder="e.g. 3.1" min="0" step="0.01">
+      <div class="field-hint" id="distanceHint" style="display:none;">Estimated from steps, usually within ~2% of GPS distance</div>
     </div>
 
     <div class="field field-quiet">
@@ -552,14 +560,17 @@
     document.querySelectorAll('.toggle-btn').forEach(b => {
       b.classList.toggle('active', b.dataset.mode === mode);
     });
+    const hint = document.getElementById('distanceHint');
     if (mode === 'miles') {
       milesEl.style.display = '';
       stepsEl.style.display = 'none';
       stepsEl.value = '';
+      hint.style.display = 'none';
     } else {
       milesEl.style.display = 'none';
       stepsEl.style.display = '';
       milesEl.value = '';
+      hint.style.display = 'block';
     }
   }
 
@@ -732,7 +743,7 @@
     document.getElementById('statSpm').textContent = data.stepsPerMinute ? Math.round(data.stepsPerMinute) : '--';
     updatePaceGauge(data.pacePerMile);
     if (data.milesEstimated) {
-      showStatus(`Run saved (miles estimated at ${data.miles} mi from steps)`, false);
+      showStatus(`Run saved. Miles estimated at ${data.miles} mi from steps (~2% margin vs GPS)`, false);
     }
   }
 
