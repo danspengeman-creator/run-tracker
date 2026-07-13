@@ -430,6 +430,8 @@
 
   .modal-feel-tag {
     margin-bottom: 8px;
+    font-size: 13px;
+    padding: 4px 10px;
   }
 
   .modal-stats {
@@ -467,14 +469,60 @@
   .modal-detail-row {
     display: flex;
     justify-content: space-between;
-    font-size: 14px;
-    padding: 6px 0;
+    font-size: 18px;
+    padding: 9px 0;
     color: var(--chalk-dim);
   }
 
   .modal-detail-row span:last-child {
     color: var(--chalk);
-    font-weight: 500;
+    font-weight: 600;
+  }
+
+  .modal-edit-btn {
+    width: 100%;
+    margin-top: 18px;
+    padding: 12px;
+    background: none;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    color: var(--chalk-dim);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+  }
+
+  .modal-edit-btn:hover {
+    border-color: var(--lane-dim);
+    color: var(--chalk);
+  }
+
+  .modal-edit-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 4px;
+  }
+
+  .modal-edit-actions .submit {
+    flex: 2;
+    margin-top: 0;
+  }
+
+  .modal-cancel-btn {
+    flex: 1;
+    padding: 14px;
+    background: none;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    color: var(--chalk-dim);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .modal-cancel-btn:hover {
+    color: var(--chalk);
   }
 
   .history-left .date {
@@ -1023,10 +1071,6 @@
     const existing = document.getElementById('runDetailModal');
     if (existing) existing.remove();
 
-    const parsedDate = new Date(run.Date);
-    const dateStr = isNaN(parsedDate) ? run.Date : parsedDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', timeZone: 'UTC' });
-    const distanceLine = run.Miles ? (run.MilesEstimated ? `~${run.Miles} mi (estimated)` : `${run.Miles} mi`) : '--';
-
     const overlay = document.createElement('div');
     overlay.id = 'runDetailModal';
     overlay.className = 'modal-overlay';
@@ -1035,38 +1079,178 @@
     overlay.innerHTML = `
       <div class="modal-card">
         <button class="modal-close" onclick="closeRunDetail()">&times;</button>
-        <div class="modal-date">${dateStr}</div>
-        ${run.Feeling ? `<span class="feel-tag ${run.Feeling} modal-feel-tag">${run.Feeling}</span>` : ''}
-
-        <div class="modal-stats">
-          <div class="modal-stat">
-            <div class="modal-stat-val stopwatch">${formatPace(run.PacePerMile)}</div>
-            <div class="modal-stat-lbl">Min / mile</div>
-          </div>
-          <div class="modal-stat">
-            <div class="modal-stat-val stopwatch">${formatMinutes(run.TotalMinutes)}</div>
-            <div class="modal-stat-lbl">Total time</div>
-          </div>
-          <div class="modal-stat">
-            <div class="modal-stat-val stopwatch">${run.StepsPerMinute ? Math.round(run.StepsPerMinute) : '--'}</div>
-            <div class="modal-stat-lbl">Steps / min</div>
-          </div>
-        </div>
-
-        <div class="modal-details">
-          <div class="modal-detail-row"><span>Distance</span><span>${distanceLine}</span></div>
-          ${run.Steps ? `<div class="modal-detail-row"><span>Steps</span><span>${run.Steps}</span></div>` : ''}
-          ${run.WeatherTemp ? `<div class="modal-detail-row"><span>Weather</span><span>${run.WeatherTemp}°F, ${run.WeatherCondition || ''}</span></div>` : ''}
-        </div>
+        <div id="modalBody"></div>
       </div>
     `;
 
     document.body.appendChild(overlay);
+    renderModalView(run);
   }
 
   function closeRunDetail() {
     const existing = document.getElementById('runDetailModal');
     if (existing) existing.remove();
+  }
+
+  function renderModalView(run) {
+    const parsedDate = new Date(run.Date);
+    const dateStr = isNaN(parsedDate) ? run.Date : parsedDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', timeZone: 'UTC' });
+    const distanceLine = run.Miles ? (run.MilesEstimated ? `~${run.Miles} mi (estimated)` : `${run.Miles} mi`) : '--';
+
+    document.getElementById('modalBody').innerHTML = `
+      <div class="modal-date">${dateStr}</div>
+      ${run.Feeling ? `<span class="feel-tag ${run.Feeling} modal-feel-tag">${run.Feeling}</span>` : ''}
+
+      <div class="modal-stats">
+        <div class="modal-stat">
+          <div class="modal-stat-val stopwatch">${formatPace(run.PacePerMile)}</div>
+          <div class="modal-stat-lbl">Min / mile</div>
+        </div>
+        <div class="modal-stat">
+          <div class="modal-stat-val stopwatch">${formatMinutes(run.TotalMinutes)}</div>
+          <div class="modal-stat-lbl">Total time</div>
+        </div>
+        <div class="modal-stat">
+          <div class="modal-stat-val stopwatch">${run.StepsPerMinute ? Math.round(run.StepsPerMinute) : '--'}</div>
+          <div class="modal-stat-lbl">Steps / min</div>
+        </div>
+      </div>
+
+      <div class="modal-details">
+        <div class="modal-detail-row"><span>Distance</span><span>${distanceLine}</span></div>
+        ${run.Steps ? `<div class="modal-detail-row"><span>Steps</span><span>${run.Steps}</span></div>` : ''}
+        ${run.WeatherTemp ? `<div class="modal-detail-row"><span>Weather</span><span>${run.WeatherTemp}°F, ${run.WeatherCondition || ''}</span></div>` : ''}
+      </div>
+
+      <button class="modal-edit-btn" onclick="renderModalEdit('${run.RowId}')">Edit this run</button>
+    `;
+  }
+
+  function renderModalEdit(rowId) {
+    const run = cachedRuns.find(r => r.RowId === rowId);
+    if (!run) return;
+
+    const totalMin = run.TotalMinutes || 0;
+    const mins = Math.floor(totalMin);
+    const secs = Math.round((totalMin - mins) * 60);
+    const editMode = run.Steps && !run.Miles ? 'steps' : (run.Steps ? 'steps' : 'miles');
+    const hasSteps = !!run.Steps;
+
+    document.getElementById('modalBody').innerHTML = `
+      <div class="modal-date">Edit run</div>
+
+      <div class="field">
+        <label>Date</label>
+        <input type="date" id="editDate" value="${run.Date}">
+      </div>
+
+      <div class="field">
+        <label>Duration</label>
+        <div class="duration-row">
+          <input type="number" id="editDurationMin" value="${mins}" min="0" step="1">
+          <span class="duration-colon">:</span>
+          <input type="number" id="editDurationSec" value="${secs}" min="0" max="59" step="1">
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="distance-header">
+          <label>Distance</label>
+          <div class="distance-toggle">
+            <button type="button" class="toggle-btn ${editMode === 'miles' ? 'active' : ''}" data-mode="miles" onclick="editSetDistanceMode('miles')">Miles</button>
+            <button type="button" class="toggle-btn ${editMode === 'steps' ? 'active' : ''}" data-mode="steps" onclick="editSetDistanceMode('steps')">Steps</button>
+          </div>
+        </div>
+        <input type="number" id="editSteps" placeholder="e.g. 4500" min="0" value="${hasSteps ? run.Steps : ''}" style="display:${editMode === 'steps' ? '' : 'none'};">
+        <input type="number" id="editMiles" placeholder="e.g. 3.1" min="0" step="0.01" value="${!hasSteps && run.Miles ? run.Miles : ''}" style="display:${editMode === 'miles' ? '' : 'none'};">
+      </div>
+
+      <div class="field">
+        <label>How did it feel?</label>
+        <div class="feeling-group">
+          <button type="button" class="feeling-btn ${run.Feeling === 'Great' ? 'active' : ''}" data-val="Great" onclick="editSetFeeling('Great')">Great</button>
+          <button type="button" class="feeling-btn ${run.Feeling === 'Okay' ? 'active' : ''}" data-val="Okay" onclick="editSetFeeling('Okay')">Okay</button>
+          <button type="button" class="feeling-btn ${run.Feeling === 'Struggled' ? 'active' : ''}" data-val="Struggled" onclick="editSetFeeling('Struggled')">Struggled</button>
+        </div>
+      </div>
+
+      <div class="modal-edit-actions">
+        <button class="modal-cancel-btn" onclick="renderModalView(cachedRuns.find(r => r.RowId === '${rowId}'))">Cancel</button>
+        <button class="submit" id="editSaveBtn" onclick="saveRunEdit('${rowId}')">Save changes</button>
+      </div>
+      <div class="status-msg" id="editStatusMsg"></div>
+    `;
+
+    window.editDistanceMode = editMode;
+    window.editFeeling = run.Feeling;
+  }
+
+  function editSetDistanceMode(mode) {
+    window.editDistanceMode = mode;
+    document.querySelectorAll('#modalBody .toggle-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.mode === mode);
+    });
+    document.getElementById('editMiles').style.display = mode === 'miles' ? '' : 'none';
+    document.getElementById('editSteps').style.display = mode === 'steps' ? '' : 'none';
+  }
+
+  function editSetFeeling(val) {
+    window.editFeeling = val;
+    document.querySelectorAll('#modalBody .feeling-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.val === val);
+    });
+  }
+
+  function saveRunEdit(rowId) {
+    const date = document.getElementById('editDate').value;
+    const durationMin = document.getElementById('editDurationMin').value;
+    const durationSec = document.getElementById('editDurationSec').value;
+    const steps = window.editDistanceMode === 'steps' ? document.getElementById('editSteps').value : '';
+    const miles = window.editDistanceMode === 'miles' ? document.getElementById('editMiles').value : '';
+    const feeling = window.editFeeling || '';
+    const statusEl = document.getElementById('editStatusMsg');
+
+    if (!date || !durationMin) {
+      statusEl.textContent = 'Date and duration are required';
+      statusEl.className = 'status-msg error';
+      return;
+    }
+    if (!steps && !miles) {
+      statusEl.textContent = 'Enter steps or miles';
+      statusEl.className = 'status-msg error';
+      return;
+    }
+
+    const saveBtn = document.getElementById('editSaveBtn');
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Saving...';
+
+    const totalMinutes = Number(durationMin) + (durationSec ? Number(durationSec) / 60 : 0);
+
+    const params = new URLSearchParams({
+      action: 'updateRun',
+      rowId, date, durationMinutes: totalMinutes, steps, miles, feeling
+    });
+
+    fetch(`${SCRIPT_URL}?${params.toString()}`)
+      .then(r => r.json())
+      .then(data => {
+        if (data.error || !data.success) {
+          statusEl.textContent = data.error || 'Could not save changes';
+          statusEl.className = 'status-msg error';
+          saveBtn.disabled = false;
+          saveBtn.textContent = 'Save changes';
+          return;
+        }
+        closeRunDetail();
+        loadHistory();
+      })
+      .catch(() => {
+        statusEl.textContent = 'Could not save, check connection';
+        statusEl.className = 'status-msg error';
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'Save changes';
+      });
   }
 
   fetchWeather();
