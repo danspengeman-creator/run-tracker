@@ -359,9 +359,123 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    cursor: pointer;
+    transition: background 0.15s ease;
+    margin: 0 -18px;
+    padding-left: 18px;
+    padding-right: 18px;
+    border-radius: 6px;
+  }
+
+  .history-item:hover, .history-item:active {
+    background: var(--asphalt);
   }
 
   .history-item:last-child { border-bottom: none; }
+
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+    animation: fadeInOverlay 0.15s ease;
+  }
+
+  @keyframes fadeInOverlay {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .modal-card {
+    background: var(--asphalt-light);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 28px 24px 24px;
+    max-width: 400px;
+    width: 100%;
+    position: relative;
+    animation: modalRise 0.2s ease;
+  }
+
+  @keyframes modalRise {
+    from { transform: translateY(12px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    background: none;
+    border: none;
+    color: var(--chalk-dim);
+    font-size: 26px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 4px 8px;
+  }
+
+  .modal-close:hover { color: var(--chalk); }
+
+  .modal-date {
+    font-size: 19px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    padding-right: 30px;
+  }
+
+  .modal-feel-tag {
+    margin-bottom: 8px;
+  }
+
+  .modal-stats {
+    display: flex;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    margin-top: 16px;
+    padding: 20px 0;
+  }
+
+  .modal-stat {
+    flex: 1;
+    text-align: center;
+  }
+
+  .modal-stat-val {
+    font-size: 30px;
+    font-weight: 700;
+    color: var(--lane);
+    line-height: 1.1;
+  }
+
+  .modal-stat-lbl {
+    font-size: 11px;
+    color: var(--chalk-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-top: 6px;
+  }
+
+  .modal-details {
+    margin-top: 16px;
+  }
+
+  .modal-detail-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    padding: 6px 0;
+    color: var(--chalk-dim);
+  }
+
+  .modal-detail-row span:last-child {
+    color: var(--chalk);
+    font-weight: 500;
+  }
 
   .history-left .date {
     font-size: 14px;
@@ -850,11 +964,14 @@
     document.querySelectorAll('.feeling-btn').forEach(b => b.classList.remove('active'));
   }
 
+  let cachedRuns = [];
+
   function loadHistory() {
     fetch(`${SCRIPT_URL}?action=getRuns`)
       .then(r => r.json())
       .then(data => {
-        if (!data.runs || data.runs.length === 0) {
+        cachedRuns = data.runs || [];
+        if (cachedRuns.length === 0) {
           historyList.innerHTML = `<div class="empty-state">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="3 3" width="36" height="36">
               <circle cx="12" cy="13" r="8"/>
@@ -865,7 +982,7 @@
           </div>`;
           return;
         }
-        historyList.innerHTML = data.runs.map(run => {
+        historyList.innerHTML = cachedRuns.map((run, i) => {
           const parsedDate = new Date(run.Date);
           const dateStr = isNaN(parsedDate) ? run.Date : parsedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
           const metaParts = [];
@@ -873,7 +990,7 @@
           if (run.Steps) metaParts.push(`${run.Steps} steps`);
           if (run.WeatherTemp) metaParts.push(`${run.WeatherTemp}°F`);
           return `
-            <div class="history-item">
+            <div class="history-item" onclick="openRunDetail(${i})">
               <div class="history-left">
                 <div class="date">${dateStr}</div>
                 <div class="meta">${metaParts.join(' · ')}</div>
@@ -881,7 +998,7 @@
               </div>
               <div class="history-right">
                 <div class="pace stopwatch">${formatPace(run.PacePerMile)} /mi</div>
-                <button class="delete-btn" onclick="deleteRun('${run.RowId}')">Delete</button>
+                <button class="delete-btn" onclick="event.stopPropagation(); deleteRun('${run.RowId}')">Delete</button>
               </div>
             </div>
           `;
@@ -897,6 +1014,59 @@
     fetch(`${SCRIPT_URL}?action=deleteRun&rowId=${rowId}`)
       .then(r => r.json())
       .then(() => loadHistory());
+  }
+
+  function openRunDetail(index) {
+    const run = cachedRuns[index];
+    if (!run) return;
+
+    const existing = document.getElementById('runDetailModal');
+    if (existing) existing.remove();
+
+    const parsedDate = new Date(run.Date);
+    const dateStr = isNaN(parsedDate) ? run.Date : parsedDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', timeZone: 'UTC' });
+    const distanceLine = run.Miles ? (run.MilesEstimated ? `~${run.Miles} mi (estimated)` : `${run.Miles} mi`) : '--';
+
+    const overlay = document.createElement('div');
+    overlay.id = 'runDetailModal';
+    overlay.className = 'modal-overlay';
+    overlay.onclick = (e) => { if (e.target === overlay) closeRunDetail(); };
+
+    overlay.innerHTML = `
+      <div class="modal-card">
+        <button class="modal-close" onclick="closeRunDetail()">&times;</button>
+        <div class="modal-date">${dateStr}</div>
+        ${run.Feeling ? `<span class="feel-tag ${run.Feeling} modal-feel-tag">${run.Feeling}</span>` : ''}
+
+        <div class="modal-stats">
+          <div class="modal-stat">
+            <div class="modal-stat-val stopwatch">${formatPace(run.PacePerMile)}</div>
+            <div class="modal-stat-lbl">Min / mile</div>
+          </div>
+          <div class="modal-stat">
+            <div class="modal-stat-val stopwatch">${formatMinutes(run.TotalMinutes)}</div>
+            <div class="modal-stat-lbl">Total time</div>
+          </div>
+          <div class="modal-stat">
+            <div class="modal-stat-val stopwatch">${run.StepsPerMinute ? Math.round(run.StepsPerMinute) : '--'}</div>
+            <div class="modal-stat-lbl">Steps / min</div>
+          </div>
+        </div>
+
+        <div class="modal-details">
+          <div class="modal-detail-row"><span>Distance</span><span>${distanceLine}</span></div>
+          ${run.Steps ? `<div class="modal-detail-row"><span>Steps</span><span>${run.Steps}</span></div>` : ''}
+          ${run.WeatherTemp ? `<div class="modal-detail-row"><span>Weather</span><span>${run.WeatherTemp}°F, ${run.WeatherCondition || ''}</span></div>` : ''}
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(overlay);
+  }
+
+  function closeRunDetail() {
+    const existing = document.getElementById('runDetailModal');
+    if (existing) existing.remove();
   }
 
   fetchWeather();
