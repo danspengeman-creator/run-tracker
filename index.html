@@ -603,14 +603,41 @@
   }
 
   .delete-btn:hover { color: var(--struggle); }
+  .card-heading-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+  }
+
+  .card-heading-row h2 {
+    margin: 0;
+  }
+
+  .runner-gif {
+    width: 52px;
+    height: auto;
+    flex-shrink: 0;
+    display: block;
+  }
+
+  @media (max-width: 600px) {
+    .runner-gif {
+      width: 42px;
+    }
+  }
 </style>
 </head>
+
 <body>
 
 <main>
 
   <div class="card">
-    <h2>Log a run</h2>
+    <div class="card-heading-row">
+      <h2>Log a run</h2>
+      <img class="runner-gif" src="runner.gif" alt="" aria-hidden="true">
+    </div>
 
     <div class="field">
       <label for="durationMin">Duration</label>
@@ -702,7 +729,7 @@
 </main>
 
 <script>
-  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxByXnHfoINzPX_j7gajB0W0QhQBxRoCenNfLU6YGDT8VcvojdznwgGjTtPPkCDTnnc/exec';
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyPhvHvIbVBTUmbdKwh-IgJNYcJJC2C4aC1UQ4ReYhTWuBv_bcB_iAwvHa6gixZmOXg/exec';
 
   let selectedFeeling = '';
   let currentWeather = null;
