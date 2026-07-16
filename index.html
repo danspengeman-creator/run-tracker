@@ -73,6 +73,48 @@
     font-weight: 600;
   }
 
+  .countdown-banner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: linear-gradient(135deg, rgba(245,210,100,0.14), rgba(245,210,100,0.04));
+    border: 1px solid var(--lane-dim);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+    text-align: center;
+  }
+
+  .countdown-banner .count-icon {
+    width: 40px;
+    height: auto;
+    flex-shrink: 0;
+    display: block;
+  }
+
+  .countdown-banner .count-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.25;
+  }
+
+  .countdown-banner .count-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--lane);
+    letter-spacing: -0.01em;
+  }
+
+  .countdown-banner .count-label {
+    font-size: 12px;
+    color: var(--chalk-dim);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
   .row {
     display: flex;
     gap: 10px;
@@ -632,6 +674,8 @@
 <body>
 
 <main>
+
+  <div class="countdown-banner" id="countdownBanner"></div>
 
   <div class="card">
     <div class="card-heading-row">
@@ -1280,8 +1324,33 @@
       });
   }
 
+  function updateCountdown() {
+    const raceDate = new Date('2026-10-04T00:00:00');
+    const now = new Date();
+    const msPerDay = 1000 * 60 * 60 * 24;
+    const diffDays = Math.ceil((raceDate - now) / msPerDay);
+
+    const el = document.getElementById('countdownBanner');
+    const icon = `<img class="count-icon" src="runner.gif" alt="">`;
+
+    if (diffDays > 30) {
+      el.innerHTML = `${icon}<div class="count-text"><span class="count-num">${diffDays} days</span><span class="count-label">until the half marathon. Let's build up to it!</span></div>`;
+    } else if (diffDays > 7) {
+      el.innerHTML = `${icon}<div class="count-text"><span class="count-num">${diffDays} days</span><span class="count-label">to go. She's getting close!</span></div>`;
+    } else if (diffDays > 1) {
+      el.innerHTML = `${icon}<div class="count-text"><span class="count-num">${diffDays} days</span><span class="count-label">left. Final stretch!</span></div>`;
+    } else if (diffDays === 1) {
+      el.innerHTML = `${icon}<div class="count-text"><span class="count-num">Tomorrow!</span><span class="count-label">Half marathon eve. You've got this.</span></div>`;
+    } else if (diffDays === 0) {
+      el.innerHTML = `${icon}<div class="count-text"><span class="count-num">Race day!</span><span class="count-label">Go get it, Michelle!</span></div>`;
+    } else {
+      el.innerHTML = `${icon}<div class="count-text"><span class="count-num">13.1 down</span><span class="count-label">Half marathon complete. Amazing work.</span></div>`;
+    }
+  }
+
   fetchWeather();
   loadHistory();
+  updateCountdown();
 </script>
 
 </body>
