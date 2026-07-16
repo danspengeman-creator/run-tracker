@@ -98,23 +98,22 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    line-height: 1.25;
+    gap: 3px;
+    line-height: 1.3;
   }
 
-  .countdown-banner .count-num {
+  .countdown-banner .count-main {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 24px;
-    font-weight: 800;
+    font-size: 17px;
+    font-weight: 700;
     color: var(--lane);
     letter-spacing: -0.01em;
   }
 
-  .countdown-banner .count-label {
+  .countdown-banner .count-sub {
     font-size: 12px;
     color: var(--chalk-dim);
     font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
   }
 
   .row {
@@ -647,11 +646,6 @@
   }
 
   .delete-btn:hover { color: var(--struggle); }
-  .card-heading-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
 
   @media (max-width: 600px) {
     .countdown-banner .count-icon {
@@ -668,10 +662,6 @@
   <div class="countdown-banner" id="countdownBanner"></div>
 
   <div class="card">
-    <div class="card-heading-row">
-      <h2>Log a run</h2>
-    </div>
-
     <div class="field">
       <label for="durationMin">Duration</label>
       <div class="duration-row">
@@ -1323,17 +1313,17 @@
     const icon = `<img class="count-icon" src="runner.gif" alt="">`;
 
     if (diffDays > 30) {
-      el.innerHTML = `${icon}<div class="count-text"><span class="count-num">${diffDays} days</span><span class="count-label">until the half marathon. Let's build up to it!</span></div>`;
+      el.innerHTML = `${icon}<div class="count-text"><span class="count-main">${diffDays} days until the half marathon</span><span class="count-sub">Let's build up to it!</span></div>`;
     } else if (diffDays > 7) {
-      el.innerHTML = `${icon}<div class="count-text"><span class="count-num">${diffDays} days</span><span class="count-label">to go. She's getting close!</span></div>`;
+      el.innerHTML = `${icon}<div class="count-text"><span class="count-main">${diffDays} days until the half marathon</span><span class="count-sub">She's getting close!</span></div>`;
     } else if (diffDays > 1) {
-      el.innerHTML = `${icon}<div class="count-text"><span class="count-num">${diffDays} days</span><span class="count-label">left. Final stretch!</span></div>`;
+      el.innerHTML = `${icon}<div class="count-text"><span class="count-main">${diffDays} days until the half marathon</span><span class="count-sub">Final stretch!</span></div>`;
     } else if (diffDays === 1) {
-      el.innerHTML = `${icon}<div class="count-text"><span class="count-num">Tomorrow!</span><span class="count-label">Half marathon eve. You've got this.</span></div>`;
+      el.innerHTML = `${icon}<div class="count-text"><span class="count-main">1 day until the half marathon</span><span class="count-sub">You've got this.</span></div>`;
     } else if (diffDays === 0) {
-      el.innerHTML = `${icon}<div class="count-text"><span class="count-num">Race day!</span><span class="count-label">Go get it, Michelle!</span></div>`;
+      el.innerHTML = `${icon}<div class="count-text"><span class="count-main">It's race day!</span><span class="count-sub">Go get it, Michelle!</span></div>`;
     } else {
-      el.innerHTML = `${icon}<div class="count-text"><span class="count-num">13.1 down</span><span class="count-label">Half marathon complete. Amazing work.</span></div>`;
+      el.innerHTML = `${icon}<div class="count-text"><span class="count-main">13.1 miles down</span><span class="count-sub">Half marathon complete. Amazing work.</span></div>`;
     }
   }
 
