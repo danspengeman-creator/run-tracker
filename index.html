@@ -75,27 +75,29 @@
 
   .countdown-banner {
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 10px;
+    gap: 6px;
     background: linear-gradient(135deg, rgba(245,210,100,0.14), rgba(245,210,100,0.04));
     border: 1px solid var(--lane-dim);
     border-radius: 10px;
-    padding: 14px 16px;
+    padding: 16px;
     margin-bottom: 16px;
     text-align: center;
   }
 
   .countdown-banner .count-icon {
-    width: 40px;
+    width: 90px;
     height: auto;
-    flex-shrink: 0;
     display: block;
+    margin-bottom: 2px;
   }
 
   .countdown-banner .count-text {
     display: flex;
     flex-direction: column;
+    align-items: center;
     line-height: 1.25;
   }
 
@@ -656,16 +658,9 @@
     margin: 0;
   }
 
-  .runner-gif {
-    width: 72px;
-    height: auto;
-    flex-shrink: 0;
-    display: block;
-  }
-
   @media (max-width: 600px) {
-    .runner-gif {
-      width: 58px;
+    .countdown-banner .count-icon {
+      width: 72px;
     }
   }
 </style>
@@ -680,7 +675,6 @@
   <div class="card">
     <div class="card-heading-row">
       <h2>Log a run</h2>
-      <img class="runner-gif" src="runner.gif" alt="" aria-hidden="true">
     </div>
 
     <div class="field">
