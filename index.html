@@ -88,7 +88,7 @@
   }
 
   .countdown-banner .count-icon {
-    width: 48px;
+    width: 82px;
     height: auto;
     display: block;
     margin-bottom: 2px;
@@ -649,7 +649,7 @@
 
   @media (max-width: 600px) {
     .countdown-banner .count-icon {
-      width: 40px;
+      width: 66px;
     }
   }
 </style>
@@ -978,7 +978,8 @@
       "You made that look easy!",
       "This is the work paying off.",
       "That's a great one for the log.",
-      "Momentum like that adds up fast."
+      "Momentum like that adds up fast.",
+      "You're a thoroughbred."
     ],
     Okay: [
       "Another one in the books.",
@@ -1334,7 +1335,7 @@
     const diffDays = Math.ceil((raceDate - now) / msPerDay);
 
     const el = document.getElementById('countdownBanner');
-    const icon = `<img class="count-icon" src="runner.gif" alt="">`;
+    const icon = `<img class="count-icon" src="horse.gif" alt="">`;
 
     if (diffDays > 30) {
       el.innerHTML = `${icon}<div class="count-text"><span class="count-main">${diffDays} days until the half marathon</span><span class="count-sub">Let's build up to it!</span></div>`;
