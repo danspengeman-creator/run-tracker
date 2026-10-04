@@ -449,6 +449,101 @@
     to { transform: translateY(0); opacity: 1; }
   }
 
+  .race-day-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.72);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    padding: 20px;
+    animation: fadeInOverlay 0.2s ease;
+    overflow: hidden;
+  }
+
+  .race-day-card {
+    background: linear-gradient(160deg, var(--asphalt-light), var(--asphalt));
+    border: 2px solid var(--lane);
+    border-radius: 18px;
+    padding: 32px 26px 26px;
+    max-width: 420px;
+    width: 100%;
+    position: relative;
+    text-align: center;
+    animation: raceDayPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 0 0 1px rgba(245,210,100,0.15), 0 0 40px rgba(245,210,100,0.35), 0 20px 60px rgba(0,0,0,0.5);
+  }
+
+  @keyframes raceDayPop {
+    0% { transform: scale(0.75); opacity: 0; }
+    60% { transform: scale(1.04); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  .race-day-badge {
+    font-size: 48px;
+    line-height: 1;
+    margin-bottom: 6px;
+    animation: raceDayBounce 1.4s ease-in-out infinite;
+  }
+
+  @keyframes raceDayBounce {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-6px) rotate(-4deg); }
+  }
+
+  .race-day-title {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--lane);
+    margin-bottom: 14px;
+    letter-spacing: -0.01em;
+  }
+
+  .race-day-body {
+    font-size: 15px;
+    color: var(--chalk);
+    line-height: 1.6;
+    margin-bottom: 14px;
+  }
+
+  .race-day-ps {
+    font-size: 13px;
+    color: var(--chalk-dim);
+    font-style: italic;
+    border-top: 1px solid var(--line);
+    padding-top: 14px;
+    margin-top: 4px;
+  }
+
+  .race-day-close {
+    width: 100%;
+    margin-top: 20px;
+    padding: 13px;
+    background: var(--lane);
+    color: var(--asphalt);
+    border: none;
+    border-radius: 9px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .confetti-piece {
+    position: absolute;
+    top: -10px;
+    width: 8px;
+    height: 8px;
+    opacity: 0.9;
+    animation: confettiFall linear infinite;
+  }
+
+  @keyframes confettiFall {
+    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(420px) rotate(360deg); opacity: 0; }
+  }
+
   .modal-close {
     position: absolute;
     top: 14px;
@@ -1352,9 +1447,49 @@
     }
   }
 
+  function showRaceDayPopup() {
+    const now = new Date();
+    const raceStart = new Date('2026-10-04T00:00:00');
+    const raceEnd = new Date('2026-10-05T00:00:00');
+    if (now < raceStart || now >= raceEnd) return;
+
+    const overlay = document.createElement('div');
+    overlay.className = 'race-day-overlay';
+    overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+
+    const colors = ['#f5d264', '#8bc98b', '#5b9cf6', '#e0796a', '#ffffff'];
+    let confettiHtml = '';
+    for (let i = 0; i < 24; i++) {
+      const left = Math.random() * 100;
+      const delay = Math.random() * 1.5;
+      const duration = 2.5 + Math.random() * 2;
+      const color = colors[Math.floor(Math.random() * colors.length)];
+      const isCircle = Math.random() > 0.5;
+      confettiHtml += `<div class="confetti-piece" style="left:${left}%; background:${color}; animation-delay:${delay}s; animation-duration:${duration}s; border-radius:${isCircle ? '50%' : '2px'};"></div>`;
+    }
+
+    overlay.innerHTML = `
+      ${confettiHtml}
+      <div class="race-day-card">
+        <div class="race-day-badge">🏅</div>
+        <div class="race-day-title">Today's the day!</div>
+        <div class="race-day-body">
+          We are so proud of you. All that training, all those early runs, it's led to this. You're going to crush this half marathon.
+          <br><br>
+          The whole family loves you and we'll be cheering you on every mile. Go get it!
+        </div>
+        <div class="race-day-ps">P.S. Remember, you're a thoroughbred. 🐴😜</div>
+        <button class="race-day-close" onclick="this.closest('.race-day-overlay').remove()">Let's go!</button>
+      </div>
+    `;
+
+    document.body.appendChild(overlay);
+  }
+
   fetchWeather();
   loadHistory();
   updateCountdown();
+  showRaceDayPopup();
 </script>
 
 </body>
