@@ -416,6 +416,221 @@
 
   .history-item:last-child { border-bottom: none; }
 
+  .race-card {
+    background: var(--asphalt);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 12px;
+    cursor: default;
+    position: relative;
+  }
+
+  .race-card:last-child {
+    margin-bottom: 0;
+  }
+
+  .race-bib-strip {
+    background: var(--lane);
+    color: var(--asphalt);
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    text-align: center;
+    padding: 5px;
+  }
+
+  .race-card-body {
+    padding: 14px 16px;
+  }
+
+  .race-card-name {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 2px;
+  }
+
+  .race-card-date {
+    font-size: 12px;
+    color: var(--chalk-dim);
+    margin-bottom: 12px;
+  }
+
+  .race-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .race-stat {
+    text-align: center;
+    background: var(--asphalt-light);
+    border-radius: 7px;
+    padding: 8px 6px;
+  }
+
+  .race-stat-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--lane);
+    line-height: 1.1;
+  }
+
+  .race-stat-lbl {
+    font-size: 9px;
+    color: var(--chalk-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: 3px;
+  }
+
+  .race-card-placements {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--line);
+    font-size: 11px;
+    color: var(--chalk-dim);
+  }
+
+  .race-card-placements strong {
+    color: var(--chalk);
+    font-weight: 700;
+  }
+
+  .race-card-delete {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    color: rgba(28,29,31,0.5);
+    font-size: 12px;
+    cursor: pointer;
+    padding: 2px 6px;
+  }
+
+  .race-card-delete:hover {
+    color: var(--asphalt);
+  }
+
+  .add-race-btn {
+    width: 100%;
+    padding: 12px;
+    background: none;
+    border: 1px dashed var(--line);
+    border-radius: 8px;
+    color: var(--chalk-dim);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+  }
+
+  .add-race-btn:hover {
+    border-color: var(--lane-dim);
+    color: var(--chalk);
+  }
+
+  .race-fab {
+    position: fixed;
+    right: 16px;
+    bottom: 24px;
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    background: var(--lane);
+    border: none;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.4);
+    font-size: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 900;
+    transition: transform 0.15s ease;
+  }
+
+  .race-fab:active {
+    transform: scale(0.93);
+  }
+
+  .race-panel-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    z-index: 1500;
+    display: none;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  .race-panel-overlay.open {
+    display: block;
+    opacity: 1;
+  }
+
+  .race-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: min(380px, 88vw);
+    background: var(--asphalt-light);
+    border-left: 1px solid var(--line);
+    padding: 24px 18px;
+    overflow-y: auto;
+    transform: translateX(100%);
+    transition: transform 0.25s ease;
+  }
+
+  .race-panel-overlay.open .race-panel {
+    transform: translateX(0);
+  }
+
+  .race-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .race-panel-header h2 {
+    font-size: 15px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--chalk-dim);
+    margin: 0;
+    font-weight: 600;
+  }
+
+  .race-panel-close {
+    background: none;
+    border: none;
+    color: var(--chalk-dim);
+    font-size: 26px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 4px 8px;
+  }
+
+  .race-panel-close:hover {
+    color: var(--chalk);
+  }
+
+  @media (max-width: 600px) {
+    .race-fab {
+      right: 12px;
+      bottom: 18px;
+      width: 48px;
+      height: 48px;
+      font-size: 20px;
+    }
+  }
+
   .modal-overlay {
     position: fixed;
     inset: 0;
@@ -763,6 +978,21 @@
 </head>
 
 <body>
+
+<button class="race-fab" id="raceFab" onclick="openRacePanel()" aria-label="Race results">
+  🏅
+</button>
+
+<div class="race-panel-overlay" id="racePanelOverlay" onclick="closeRacePanel(event)">
+  <div class="race-panel" onclick="event.stopPropagation()">
+    <div class="race-panel-header">
+      <h2>Race Results</h2>
+      <button class="race-panel-close" onclick="closeRacePanel()">&times;</button>
+    </div>
+    <div id="raceList"></div>
+    <button class="add-race-btn" onclick="openAddRace()" style="margin-top:12px;">+ Add a race result</button>
+  </div>
+</div>
 
 <main>
 
@@ -1274,6 +1504,209 @@
     fetch(`${SCRIPT_URL}?action=deleteRun&rowId=${rowId}`)
       .then(r => r.json())
       .then(() => loadHistory());
+  }
+
+  function openRacePanel() {
+    document.getElementById('racePanelOverlay').classList.add('open');
+    loadRaces();
+  }
+
+  function closeRacePanel() {
+    document.getElementById('racePanelOverlay').classList.remove('open');
+  }
+
+  let cachedRaces = [];
+
+  function loadRaces() {
+    fetch(`${SCRIPT_URL}?action=getRaces`)
+      .then(r => r.json())
+      .then(data => {
+        cachedRaces = data.races || [];
+        const el = document.getElementById('raceList');
+        if (cachedRaces.length === 0) {
+          el.innerHTML = `<div class="empty-state" style="padding: 12px 0;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="3 3" width="30" height="30">
+              <path d="M6 3v18M6 4h11l-2 4 2 4H6"/>
+            </svg>
+            <div>No races logged yet. Add your first result.</div>
+          </div>`;
+          return;
+        }
+        el.innerHTML = cachedRaces.map(race => {
+          const parsedDate = new Date(race.Date);
+          const dateStr = isNaN(parsedDate) ? race.Date : parsedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
+          const placements = [];
+          if (race.OverallPlace) placements.push(`<span><strong>${race.OverallPlace}</strong>${race.OverallTotal ? ` / ${race.OverallTotal}` : ''} overall</span>`);
+          if (race.AgeGroupPlace) placements.push(`<span><strong>${race.AgeGroupPlace}</strong>${race.AgeGroupTotal ? ` / ${race.AgeGroupTotal}` : ''} age group</span>`);
+          if (race.GenderPlace) placements.push(`<span><strong>${race.GenderPlace}</strong> gender</span>`);
+          return `
+            <div class="race-card">
+              <button class="race-card-delete" onclick="deleteRace('${race.RowId}')">Delete</button>
+              <div class="race-bib-strip">${race.BibNumber ? `Bib ${race.BibNumber}` : 'Race Result'}</div>
+              <div class="race-card-body">
+                <div class="race-card-name">${race.RaceName || 'Race'}</div>
+                <div class="race-card-date">${dateStr}${race.Distance ? ` · ${race.Distance}` : ''}</div>
+                <div class="race-stat-grid">
+                  <div class="race-stat">
+                    <div class="race-stat-val stopwatch">${race.ChipTime || '--'}</div>
+                    <div class="race-stat-lbl">Chip time</div>
+                  </div>
+                  <div class="race-stat">
+                    <div class="race-stat-val stopwatch">${race.Pace || '--'}</div>
+                    <div class="race-stat-lbl">Pace / mi</div>
+                  </div>
+                </div>
+                ${placements.length ? `<div class="race-card-placements">${placements.join('')}</div>` : ''}
+              </div>
+            </div>
+          `;
+        }).join('');
+      })
+      .catch(() => {
+        document.getElementById('raceList').innerHTML = '<div class="empty-state">Could not load race results</div>';
+      });
+  }
+
+  function deleteRace(rowId) {
+    if (!confirm('Delete this race result?')) return;
+    fetch(`${SCRIPT_URL}?action=deleteRace&rowId=${rowId}`)
+      .then(r => r.json())
+      .then(() => loadRaces());
+  }
+
+  function openAddRace() {
+    const existing = document.getElementById('runDetailModal');
+    if (existing) existing.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'runDetailModal';
+    overlay.className = 'modal-overlay';
+    overlay.onclick = (e) => { if (e.target === overlay) closeRunDetail(); };
+
+    overlay.innerHTML = `
+      <div class="modal-card">
+        <button class="modal-close" onclick="closeRunDetail()">&times;</button>
+        <div class="modal-date">Add race result</div>
+
+        <div class="field">
+          <label>Race name</label>
+          <input type="text" id="raceName" placeholder="e.g. Seaside Half Marathon">
+        </div>
+
+        <div class="field">
+          <label>Date</label>
+          <input type="date" id="raceDate">
+        </div>
+
+        <div class="field">
+          <label>Distance</label>
+          <input type="text" id="raceDistance" placeholder="e.g. Half Marathon, 5K">
+        </div>
+
+        <div class="row">
+          <div class="field">
+            <label>Chip time</label>
+            <input type="text" id="raceChipTime" placeholder="1:52:23">
+          </div>
+          <div class="field">
+            <label>Pace / mi</label>
+            <input type="text" id="racePace" placeholder="8:35">
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="field">
+            <label>Overall place</label>
+            <input type="number" id="raceOverallPlace" placeholder="96" min="0">
+          </div>
+          <div class="field">
+            <label>Overall total</label>
+            <input type="number" id="raceOverallTotal" placeholder="362" min="0">
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="field">
+            <label>Age group place</label>
+            <input type="number" id="raceAgeGroupPlace" placeholder="7" min="0">
+          </div>
+          <div class="field">
+            <label>Age group total</label>
+            <input type="number" id="raceAgeGroupTotal" placeholder="47" min="0">
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="field">
+            <label>Gender place</label>
+            <input type="number" id="raceGenderPlace" placeholder="19" min="0">
+          </div>
+          <div class="field">
+            <label>Bib number</label>
+            <input type="text" id="raceBibNumber" placeholder="1680">
+          </div>
+        </div>
+
+        <div class="modal-edit-actions">
+          <button class="modal-cancel-btn" onclick="closeRunDetail()">Cancel</button>
+          <button class="submit" id="raceSaveBtn" onclick="saveRaceResult()">Save result</button>
+        </div>
+        <div class="status-msg" id="raceStatusMsg"></div>
+      </div>
+    `;
+
+    document.body.appendChild(overlay);
+  }
+
+  function saveRaceResult() {
+    const raceName = document.getElementById('raceName').value;
+    const date = document.getElementById('raceDate').value;
+    const distance = document.getElementById('raceDistance').value;
+    const chipTime = document.getElementById('raceChipTime').value;
+    const gunTime = chipTime;
+    const pace = document.getElementById('racePace').value;
+    const overallPlace = document.getElementById('raceOverallPlace').value;
+    const overallTotal = document.getElementById('raceOverallTotal').value;
+    const ageGroupPlace = document.getElementById('raceAgeGroupPlace').value;
+    const ageGroupTotal = document.getElementById('raceAgeGroupTotal').value;
+    const genderPlace = document.getElementById('raceGenderPlace').value;
+    const bibNumber = document.getElementById('raceBibNumber').value;
+    const statusEl = document.getElementById('raceStatusMsg');
+
+    if (!raceName || !date) {
+      statusEl.textContent = 'Race name and date are required';
+      statusEl.className = 'status-msg error';
+      return;
+    }
+
+    const saveBtn = document.getElementById('raceSaveBtn');
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Saving...';
+
+    const params = new URLSearchParams({
+      action: 'addRace', raceName, date, distance, chipTime, gunTime, pace,
+      overallPlace, overallTotal, ageGroupPlace, ageGroupTotal, genderPlace, bibNumber
+    });
+
+    fetch(`${SCRIPT_URL}?${params.toString()}`)
+      .then(r => r.json())
+      .then(data => {
+        if (data.error || !data.success) {
+          statusEl.textContent = data.error || 'Could not save race result';
+          statusEl.className = 'status-msg error';
+          saveBtn.disabled = false;
+          saveBtn.textContent = 'Save result';
+          return;
+        }
+        closeRunDetail();
+        loadRaces();
+      })
+      .catch(() => {
+        statusEl.textContent = 'Could not save, check connection';
+        statusEl.className = 'status-msg error';
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'Save result';
+      });
   }
 
   function openRunDetail(index) {
