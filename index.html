@@ -621,6 +621,30 @@
     color: var(--chalk);
   }
 
+  .race-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    padding: 40px 0;
+    color: var(--chalk-dim);
+    font-size: 13px;
+    text-align: center;
+  }
+
+  .race-loading-spinner {
+    width: 28px;
+    height: 28px;
+    border: 3px solid var(--line);
+    border-top-color: var(--lane);
+    border-radius: 50%;
+    animation: raceSpin 0.7s linear infinite;
+  }
+
+  @keyframes raceSpin {
+    to { transform: rotate(360deg); }
+  }
+
   @media (max-width: 600px) {
     .race-fab {
       right: 12px;
@@ -1506,8 +1530,22 @@
       .then(() => loadHistory());
   }
 
+  const RACE_LOADING_MESSAGES = [
+    "Pulling up your race results...",
+    "Let's see what we've got...",
+    "Digging up the results...",
+    "One sec, fetching the stats...",
+    "Loading the hardware..."
+  ];
+
   function openRacePanel() {
     document.getElementById('racePanelOverlay').classList.add('open');
+    const el = document.getElementById('raceList');
+    const msg = RACE_LOADING_MESSAGES[Math.floor(Math.random() * RACE_LOADING_MESSAGES.length)];
+    el.innerHTML = `<div class="race-loading">
+      <div class="race-loading-spinner"></div>
+      <div>${msg}</div>
+    </div>`;
     loadRaces();
   }
 
