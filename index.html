@@ -1126,8 +1126,38 @@
     ]
   };
 
+  // Training-for-the-next-event lines, shown through Dec 1 2026 only (see ENCOURAGEMENT_EXPIRY)
+  const ENCOURAGEMENT_NEXT_GOAL = {
+    Great: [
+      "Building toward whatever's next, one strong run at a time.",
+      "That's the kind of run that sets up a great next race.",
+      "Still putting in the work after the big one. That's real commitment."
+    ],
+    Okay: [
+      "Training doesn't stop just because the big race did.",
+      "This is what staying in it looks like."
+    ],
+    Struggled: [
+      "Still showing up between races. That's what matters most.",
+      "The next goal doesn't care that today was hard. You still did it."
+    ]
+  };
+
+  const ENCOURAGEMENT_NEXT_GOAL_EXPIRY = new Date('2026-12-01T00:00:00');
+
   function pickEncouragement(feeling) {
-    const pool = ENCOURAGEMENT[feeling] || ENCOURAGEMENT.Okay;
+    const basePool = ENCOURAGEMENT[feeling] || ENCOURAGEMENT.Okay;
+    let pool = basePool;
+
+    // Struggled next-goal lines never expire; Great/Okay next-goal lines only show through the expiry date
+    const nextGoalPool = ENCOURAGEMENT_NEXT_GOAL[feeling];
+    if (nextGoalPool) {
+      const stillActive = feeling === 'Struggled' || new Date() < ENCOURAGEMENT_NEXT_GOAL_EXPIRY;
+      if (stillActive) {
+        pool = basePool.concat(nextGoalPool);
+      }
+    }
+
     return pool[Math.floor(Math.random() * pool.length)];
   }
 
@@ -1455,7 +1485,21 @@
     } else if (diffDays === 0) {
       el.innerHTML = `${icon}<div class="count-text"><span class="count-main">It's race day!</span><span class="count-sub">Go get it, Michelle!</span></div>`;
     } else {
-      el.innerHTML = `${icon}<div class="count-text"><span class="count-main">13.1 miles down</span><span class="count-sub">Half marathon complete. Amazing work.</span></div>`;
+      const postRaceExpiry = new Date('2026-10-20T00:00:00');
+      if (now < postRaceExpiry) {
+        const postRacePool = [
+          "13.1 down. Now building toward whatever's next.",
+          "Half marathon done. Onward to the next goal.",
+          "That finish line was just a checkpoint. Keep going.",
+          "One race closed, already training for the next one.",
+          "13.1 miles in the books. Let's build toward something new.",
+          "The half marathon is done. The habit isn't."
+        ];
+        const pick = postRacePool[Math.floor(Math.random() * postRacePool.length)];
+        el.innerHTML = `${icon}<div class="count-text"><span class="count-main">${pick}</span></div>`;
+      } else {
+        el.innerHTML = `${icon}<div class="count-text"><span class="count-main">13.1 miles down</span><span class="count-sub">Half marathon complete. Amazing work.</span></div>`;
+      }
     }
   }
 
